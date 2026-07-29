@@ -95,6 +95,31 @@
     width:100%;background:var(--ink-card);border:1px solid var(--line);color:var(--paper);
     border-radius:8px;padding:10px 14px;font-family:'Inter';font-size:0.88rem;
   }
+  .itunes-box{
+    background:var(--ink-card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:22px;
+  }
+  .itunes-box .itunes-label{
+    font-family:'IBM Plex Mono';font-size:0.7rem;color:var(--sky);letter-spacing:0.5px;margin-bottom:10px;display:block;
+  }
+  .itunes-row{display:flex;gap:8px;}
+  .itunes-row input{
+    flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:10px 12px;font-family:'Inter';font-size:0.88rem;
+  }
+  .itunes-row button{
+    background:var(--sky);color:var(--ink);border:none;border-radius:8px;padding:0 16px;
+    font-family:'IBM Plex Mono';font-size:0.76rem;font-weight:500;cursor:pointer;white-space:nowrap;
+  }
+  .itunes-results{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+  .itunes-hit{
+    display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;
+    border:1px solid transparent;transition:background .15s;
+  }
+  .itunes-hit:hover, .itunes-hit:focus{background:var(--ink-raised);border-color:var(--line);}
+  .itunes-hit img{width:36px;height:36px;border-radius:4px;flex-shrink:0;}
+  .itunes-hit .hit-info strong{display:block;font-size:0.85rem;font-family:'Inter';font-weight:600;}
+  .itunes-hit .hit-info span{font-size:0.75rem;color:var(--muted);}
+  .itunes-status{font-size:0.78rem;color:var(--muted);font-family:'IBM Plex Mono';margin-top:8px;}
   .track{
     display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;
     padding:12px 4px;border-bottom:1px solid var(--line);
@@ -125,19 +150,33 @@
 </head>
 <body>
 <div class="wrap">
+
   <div class="hero">
     <div class="disc"><div class="disc-label">33⅓</div></div>
     <h1>The Record Room</h1>
     <p class="tagline">Library. Journal. Talk. All under one blacklight.</p>
   </div>
+
   <div class="sides">
     <button class="side-btn active" data-side="A" onclick="flipTo('A')">LIBRARY</button>
     <button class="side-btn" data-side="B" onclick="flipTo('B')">JOURNAL</button>
     <button class="side-btn" data-side="C" onclick="flipTo('C')">TALK</button>
   </div>
+
   <section class="panel active" id="panel-A">
     <h2 class="panel-title">Library</h2>
     <p class="panel-sub">Every track, tagged by genre.</p>
+
+    <div class="itunes-box">
+      <span class="itunes-label">SEARCH ITUNES — auto-fill a track</span>
+      <div class="itunes-row">
+        <input type="text" id="itunes-query" placeholder="Song or artist name…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchItunes();}">
+        <button type="button" onclick="searchItunes()">Search</button>
+      </div>
+      <div class="itunes-status" id="itunes-status"></div>
+      <div class="itunes-results" id="itunes-results"></div>
+    </div>
+
     <form class="card" id="song-form">
       <input type="text" id="s-title" placeholder="Track title" required class="full">
       <input type="text" id="s-artist" placeholder="Artist" required>
@@ -146,13 +185,16 @@
       <input type="text" id="s-duration" placeholder="Duration (mm:ss)">
       <button type="submit" class="add-btn">+ add track</button>
     </form>
+
     <div class="chips" id="genre-chips-lib"></div>
     <div class="search"><input type="text" id="song-search" placeholder="Search title or artist…" oninput="renderSongs()"></div>
     <div id="song-list"></div>
   </section>
+
   <section class="panel" id="panel-B">
     <h2 class="panel-title">Journal</h2>
     <p class="panel-sub">Gigs, discoveries, whatever's on repeat.</p>
+
     <form class="card single" id="journal-form">
       <input type="text" id="j-title" placeholder="Entry title" required>
       <textarea id="j-body" placeholder="What happened? What did you hear?" required></textarea>
@@ -160,21 +202,26 @@
     </form>
     <div id="journal-list"></div>
   </section>
+
   <section class="panel" id="panel-C">
     <h2 class="panel-title">Talk</h2>
     <p class="panel-sub">Open floor — say what you're spinning.</p>
-    <p class="notice">shared feed — visible to anyone who opens this page</p>
+    <p class="notice">saved on this device only</p>
+
     <form class="card" id="talk-form">
       <input type="text" id="t-name" placeholder="Your name" required>
       <input type="text" id="t-genre" placeholder="Genre tag" required>
       <textarea id="t-body" placeholder="What's on your mind?" required class="full"></textarea>
       <button type="submit" class="add-btn">+ post</button>
     </form>
+
     <div class="chips" id="genre-chips-talk"></div>
     <div id="talk-list"></div>
   </section>
+
   <p class="status" id="status">loading…</p>
 </div>
+
 <script>
 let songs = JSON.parse(localStorage.getItem('rr_songs')||'[]');
 let journal = JSON.parse(localStorage.getItem('rr_journal')||'[]');
@@ -188,15 +235,69 @@ function genreColor(g){
   let h = 0; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % PALETTE.length;
   return PALETTE[h].bg;
 }
-function renderAll(){ renderSongs(); renderJournal(); renderTalk(); document.getElementById('status').textContent='saved on this device'; }
+
+async function searchItunes(){
+  const q = document.getElementById('itunes-query').value.trim();
+  const statusEl = document.getElementById('itunes-status');
+  const resultsEl = document.getElementById('itunes-results');
+  if(!q){ statusEl.textContent=''; resultsEl.innerHTML=''; return; }
+  statusEl.textContent = 'searching…';
+  resultsEl.innerHTML = '';
+  try{
+    const res = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=song&limit=6');
+    const data = await res.json();
+    if(!data.results || data.results.length===0){
+      statusEl.textContent = 'no matches found';
+      return;
+    }
+    statusEl.textContent = data.results.length + ' result' + (data.results.length>1?'s':'') + ' — tap one to fill the form';
+    resultsEl.innerHTML = data.results.map((r,i) => {
+      const artUrl = (r.artworkUrl60||'').replace('http://','https://');
+      return `<div class="itunes-hit" tabindex="0" onclick="pickItunes(${i})">
+        <img src="${artUrl}" alt="">
+        <div class="hit-info"><strong>${escapeHtml(r.trackName||'')}</strong>
+        <span>${escapeHtml(r.artistName||'')}${r.collectionName?' · '+escapeHtml(r.collectionName):''}</span></div>
+      </div>`;
+    }).join('');
+    window._itunesResults = data.results;
+  }catch(e){
+    statusEl.textContent = "couldn't reach iTunes — check your connection and try again";
+  }
+}
+
+function pickItunes(i){
+  const r = window._itunesResults[i];
+  if(!r) return;
+  document.getElementById('s-title').value = r.trackName || '';
+  document.getElementById('s-artist').value = r.artistName || '';
+  document.getElementById('s-album').value = r.collectionName || '';
+  document.getElementById('s-genre').value = r.primaryGenreName || '';
+  if(r.trackTimeMillis){
+    const totalSec = Math.round(r.trackTimeMillis/1000);
+    const mm = Math.floor(totalSec/60);
+    const ss = String(totalSec%60).padStart(2,'0');
+    document.getElementById('s-duration').value = mm+':'+ss;
+  }
+  document.getElementById('itunes-results').innerHTML = '';
+  document.getElementById('itunes-status').textContent = 'filled in below — tap "add track" to save it';
+  document.getElementById('s-title').focus();
+}
+
+function loadAll(){
+  renderSongs(); renderJournal(); renderTalk();
+  document.getElementById('status').textContent = 'saved on this device';
+}
 function saveSongs(){ localStorage.setItem('rr_songs', JSON.stringify(songs)); }
 function saveJournal(){ localStorage.setItem('rr_journal', JSON.stringify(journal)); }
 function saveTalk(){ localStorage.setItem('rr_talk', JSON.stringify(talk)); }
+
 function flipTo(side){
   document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active', b.dataset.side===side));
   ['A','B','C'].forEach(s=>document.getElementById('panel-'+s).classList.toggle('active', s===side));
 }
+
 function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
+
 function renderChips(containerId, items, filterVal, onClick){
   const genres = [...new Set(items.map(i=>i.genre).filter(Boolean))];
   const el = document.getElementById(containerId);
@@ -209,6 +310,7 @@ function renderChips(containerId, items, filterVal, onClick){
 }
 function setLibFilter(g){ libFilter=g; renderSongs(); }
 function setTalkFilter(g){ talkFilter=g; renderTalk(); }
+
 function renderSongs(){
   renderChips('genre-chips-lib', songs, libFilter, 'setLibFilter');
   const q = (document.getElementById('song-search').value||'').toLowerCase();
@@ -232,6 +334,7 @@ function renderSongs(){
     </div>`;
   }).join('');
 }
+
 function renderJournal(){
   const list = document.getElementById('journal-list');
   if(journal.length===0){ list.innerHTML='<p class="empty">No entries yet.</p>'; return; }
@@ -245,6 +348,7 @@ function renderJournal(){
     </div>`;
   }).join('');
 }
+
 function renderTalk(){
   renderChips('genre-chips-talk', talk, talkFilter, 'setTalkFilter');
   const filtered = talk.filter(t => talkFilter==='all' || t.genre===talkFilter);
@@ -263,6 +367,7 @@ function renderTalk(){
     </div>`;
   }).join('');
 }
+
 document.getElementById('song-form').addEventListener('submit', e=>{
   e.preventDefault();
   songs.push({
@@ -274,6 +379,7 @@ document.getElementById('song-form').addEventListener('submit', e=>{
   });
   e.target.reset(); renderSongs(); saveSongs();
 });
+
 document.getElementById('journal-form').addEventListener('submit', e=>{
   e.preventDefault();
   journal.push({
@@ -283,6 +389,7 @@ document.getElementById('journal-form').addEventListener('submit', e=>{
   });
   e.target.reset(); renderJournal(); saveJournal();
 });
+
 document.getElementById('talk-form').addEventListener('submit', e=>{
   e.preventDefault();
   talk.push({
@@ -293,10 +400,12 @@ document.getElementById('talk-form').addEventListener('submit', e=>{
   });
   e.target.reset(); renderTalk(); saveTalk();
 });
+
 function deleteSong(i){ songs.splice(i,1); renderSongs(); saveSongs(); }
 function deleteEntry(i){ journal.splice(i,1); renderJournal(); saveJournal(); }
 function deleteTalk(i){ talk.splice(i,1); renderTalk(); saveTalk(); }
-renderAll();
+
+loadAll();
 </script>
 </body>
 </html>
