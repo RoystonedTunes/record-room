@@ -169,4 +169,553 @@
   .tape-track .tt-name{color:var(--paper);}
   .tape-track .tt-artist{color:var(--muted);font-size:0.74rem;margin-left:6px;}
   .tape-add{display:flex;gap:8px;}
-  .tape-add select{flex:1;background
+  .tape-add select{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font-family:'Inter';font-size:0.82rem;}
+  .tape-add button{background:var(--amber);color:var(--ink);border:none;border-radius:8px;padding:0 14px;font-family:'IBM Plex Mono';font-size:0.72rem;font-weight:500;cursor:pointer;}
+
+  .empty{text-align:center;color:var(--muted);font-size:0.86rem;padding:28px 0;font-style:italic;}
+  .status{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:34px;font-family:'IBM Plex Mono';}
+  .notice{font-size:0.72rem;color:var(--muted);text-align:center;margin:-14px 0 20px;font-family:'IBM Plex Mono';}
+
+  .spotify-field{margin-bottom:2px;}
+  .play-toggle{background:none;border:1px solid var(--line);color:#1DB954;border-radius:999px;font-family:'IBM Plex Mono';font-size:0.68rem;padding:4px 10px;cursor:pointer;margin-left:6px;white-space:nowrap;transition:background .15s;}
+  .play-toggle:hover{background:var(--ink-raised);}
+  .spotify-embed{margin-top:8px;border-radius:12px;overflow:hidden;}
+  .spotify-embed iframe{display:block;width:100%;border:none;}
+
+  .shuffle-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+  .shuffle-btn{background:var(--ink-card);border:1px solid var(--line);color:var(--paper);border-radius:999px;padding:8px 16px;font-family:'IBM Plex Mono';font-size:0.72rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .15s;}
+  .shuffle-btn:active{transform:scale(0.94);}
+  .track.spotlight{animation:spotlight-pulse 1.4s ease;}
+  @keyframes spotlight-pulse{
+    0%{background:var(--ink-card);box-shadow:0 0 0 0 rgba(198,255,77,0);}
+    30%{background:var(--ink-raised);box-shadow:0 0 0 3px rgba(198,255,77,0.4);}
+    100%{background:transparent;box-shadow:0 0 0 0 rgba(198,255,77,0);}
+  }
+  .confetti-piece{position:fixed;width:7px;height:7px;border-radius:2px;pointer-events:none;z-index:999;animation:confetti-fly 0.8s ease-out forwards;}
+  @keyframes confetti-fly{0%{transform:translate(0,0) rotate(0deg);opacity:1;}100%{transform:translate(var(--dx), var(--dy)) rotate(var(--rot));opacity:0;}}
+
+  .engage-row{display:flex;align-items:center;gap:14px;margin-top:10px;}
+  .like-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 12px;font-family:'IBM Plex Mono';font-size:0.74rem;cursor:pointer;display:flex;align-items:center;gap:5px;transition:transform .15s;}
+  .like-btn:active{transform:scale(0.92);}
+  .comment-toggle{background:none;border:none;color:var(--sky);font-family:'IBM Plex Mono';font-size:0.74rem;cursor:pointer;}
+  .comments-box{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:none;}
+  .comments-box.open{display:block;}
+  .comment{padding:6px 0;font-size:0.82rem;}
+  .comment .c-name{font-family:'Fraunces';font-weight:600;color:var(--paper);}
+  .comment .c-time{font-family:'IBM Plex Mono';font-size:0.65rem;color:var(--muted);margin-left:6px;}
+  .comment .c-text{color:var(--muted);margin-top:2px;}
+  .comment-add{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .comment-add input{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px 10px;font-family:'Inter';font-size:0.78rem;}
+  .comment-add input.c-name-input{width:90px;flex-shrink:0;}
+  .comment-add input.c-text-input{flex:1;min-width:100px;}
+  .comment-add button{background:var(--sky);color:var(--ink);border:none;border-radius:8px;padding:0 12px;font-family:'IBM Plex Mono';font-size:0.7rem;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="disc"><div class="disc-label">666</div></div>
+    <h1>The Record Room</h1>
+    <p class="tagline">Library. Journal. Talk. Mixtapes.</p>
+  </div>
+
+  <div class="auth-bar" id="auth-bar"></div>
+
+  <div class="sides" id="sides">
+    <div class="side-indicator" id="side-indicator"></div>
+    <button class="side-btn active" data-side="A" onclick="flipTo('A')">LIBRARY</button>
+    <button class="side-btn" data-side="B" onclick="flipTo('B')">JOURNAL</button>
+    <button class="side-btn" data-side="C" onclick="flipTo('C')">TALK</button>
+    <button class="side-btn" data-side="D" onclick="flipTo('D')">MIXTAPES</button>
+  </div>
+
+  <section class="panel active" id="panel-A">
+    <h2 class="panel-title">Library</h2>
+    <p class="panel-sub">Shared with everyone. Signed-in members can add tracks.</p>
+
+    <p class="gate-msg" id="gate-lib">🔒 Sign in above to add tracks — anyone can browse and listen.</p>
+
+    <div class="itunes-box" id="itunes-box">
+      <span class="itunes-label">SEARCH ITUNES — auto-fill a track</span>
+      <div class="itunes-row">
+        <input type="text" id="itunes-query" placeholder="Song or artist name…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchItunes();}">
+        <button type="button" onclick="searchItunes()">Search</button>
+      </div>
+      <div class="itunes-status" id="itunes-status"></div>
+      <div class="itunes-results" id="itunes-results"></div>
+    </div>
+
+    <form class="card" id="song-form">
+      <input type="text" id="s-title" placeholder="Track title" required class="full">
+      <input type="text" id="s-artist" placeholder="Artist" required>
+      <input type="text" id="s-genre" placeholder="Genre (e.g. indie, hyperpop)" required>
+      <input type="text" id="s-album" placeholder="Album">
+      <input type="text" id="s-duration" placeholder="Duration (mm:ss)">
+      <input type="text" id="s-spotify" placeholder="Spotify link (optional)" class="full spotify-field">
+      <button type="submit" class="add-btn">+ add track</button>
+    </form>
+
+    <div class="chips" id="genre-chips-lib"></div>
+    <div class="search"><input type="text" id="song-search" placeholder="Search title or artist…" oninput="renderSongs()"></div>
+    <div class="shuffle-row"><button type="button" class="shuffle-btn" onclick="shuffleSpotlight()">🎲 Shuffle</button></div>
+    <div id="song-list"></div>
+  </section>
+
+  <section class="panel" id="panel-B">
+    <h2 class="panel-title">Journal</h2>
+    <p class="panel-sub">Shared write-ups from signed-in members.</p>
+
+    <p class="gate-msg" id="gate-journal">🔒 Sign in above to write a journal entry.</p>
+
+    <form class="card single" id="journal-form">
+      <input type="text" id="j-title" placeholder="Entry title" required>
+      <textarea id="j-body" placeholder="What happened? What did you hear?" required></textarea>
+      <button type="submit" class="add-btn">+ add entry</button>
+    </form>
+    <div id="journal-list"></div>
+  </section>
+
+  <section class="panel" id="panel-C">
+    <h2 class="panel-title">Talk</h2>
+    <p class="panel-sub">Open floor — anyone can post, like, and comment.</p>
+
+    <form class="card" id="talk-form">
+      <input type="text" id="t-name" placeholder="Your name" required>
+      <input type="text" id="t-genre" placeholder="Genre tag" required>
+      <textarea id="t-body" placeholder="What's on your mind?" required class="full"></textarea>
+      <input type="text" id="t-spotify" placeholder="Spotify link (optional)" class="full spotify-field">
+      <button type="submit" class="add-btn">+ post</button>
+    </form>
+
+    <div class="chips" id="genre-chips-talk"></div>
+    <div id="talk-list"></div>
+  </section>
+
+  <section class="panel" id="panel-D">
+    <h2 class="panel-title">Mixtapes</h2>
+    <p class="panel-sub">Pull tracks from the Library into a themed tape (saved on this device).</p>
+
+    <form class="card single" id="tape-form">
+      <input type="text" id="tape-name" placeholder="Mixtape name (e.g. late night drive)" required>
+      <button type="submit" class="add-btn">+ new mixtape</button>
+    </form>
+    <div id="tape-list"></div>
+  </section>
+
+  <p class="status" id="status">connecting…</p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCruy4GNyzWGC3eDhOB9Kt9fj8c_D324MY",
+  authDomain: "record-room-9bfb7.firebaseapp.com",
+  projectId: "record-room-9bfb7",
+  storageBucket: "record-room-9bfb7.firebasestorage.app",
+  messagingSenderId: "441732426888",
+  appId: "1:441732426888:web:ed1d10a1861cb71d08033d",
+  measurementId: "G-SGKVL5YPC7"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+let songs = [], journal = [], talk = [];
+let tapes = JSON.parse(localStorage.getItem('rr_tapes')||'[]');
+let libFilter = 'all', talkFilter = 'all';
+const PALETTE = [ {bg:'#C6FF4D'}, {bg:'#FF5D9E'}, {bg:'#6FD3FF'}, {bg:'#FFC15E'} ];
+function genreColor(g){
+  const s = (g||'other').toLowerCase();
+  let h = 0; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % PALETTE.length;
+  return PALETTE[h].bg;
+}
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
+
+/* ---------- AUTH ---------- */
+function signUp(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-password').value;
+  auth.createUserWithEmailAndPassword(email, pass).catch(e=>{ document.getElementById('auth-status').textContent = e.message; });
+}
+function logIn(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-password').value;
+  auth.signInWithEmailAndPassword(email, pass).catch(e=>{ document.getElementById('auth-status').textContent = e.message; });
+}
+function logOut(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  currentUser = user;
+  renderAuthBar();
+  const gateLib = document.getElementById('gate-lib');
+  const gateJournal = document.getElementById('gate-journal');
+  const songForm = document.getElementById('song-form');
+  const journalForm = document.getElementById('journal-form');
+  const itunesBox = document.getElementById('itunes-box');
+  if(user){
+    gateLib.style.display='none'; gateJournal.style.display='none';
+    songForm.style.display='grid'; journalForm.style.display='grid'; itunesBox.style.display='block';
+  } else {
+    gateLib.style.display='block'; gateJournal.style.display='block';
+    songForm.style.display='none'; journalForm.style.display='none'; itunesBox.style.display='none';
+  }
+});
+
+function renderAuthBar(){
+  const bar = document.getElementById('auth-bar');
+  if(currentUser){
+    bar.innerHTML = `<span class="auth-signed">Signed in as ${escapeHtml(currentUser.email)}</span><button class="auth-btn secondary" onclick="logOut()">log out</button>`;
+  } else {
+    bar.innerHTML = `<div class="auth-form">
+      <input type="email" id="auth-email" placeholder="email">
+      <input type="password" id="auth-password" placeholder="password">
+      <button class="auth-btn" onclick="signUp()">sign up</button>
+      <button class="auth-btn secondary" onclick="logIn()">log in</button>
+    </div><p class="auth-status" id="auth-status"></p>`;
+  }
+}
+
+/* ---------- FIRESTORE LISTENERS (shared, realtime) ---------- */
+db.collection('songs').orderBy('createdAt').onSnapshot(snap=>{
+  songs = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderSongs(); renderTapes();
+  document.getElementById('status').textContent = 'live · shared with everyone';
+}, err=>{ document.getElementById('status').textContent = 'connection issue — check Firestore rules'; });
+
+db.collection('journal').orderBy('createdAt').onSnapshot(snap=>{
+  journal = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderJournal();
+});
+
+db.collection('talk').orderBy('createdAt').onSnapshot(snap=>{
+  talk = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderTalk();
+});
+
+/* ---------- iTunes search ---------- */
+async function searchItunes(){
+  const q = document.getElementById('itunes-query').value.trim();
+  const statusEl = document.getElementById('itunes-status');
+  const resultsEl = document.getElementById('itunes-results');
+  if(!q){ statusEl.textContent=''; resultsEl.innerHTML=''; return; }
+  statusEl.textContent = 'searching…'; resultsEl.innerHTML = '';
+  try{
+    const res = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=song&limit=6');
+    const data = await res.json();
+    if(!data.results || data.results.length===0){ statusEl.textContent = 'no matches found'; return; }
+    statusEl.textContent = data.results.length + ' result' + (data.results.length>1?'s':'') + ' — tap one to fill the form';
+    resultsEl.innerHTML = data.results.map((r,i) => {
+      const artUrl = (r.artworkUrl60||'').replace('http://','https://');
+      return `<div class="itunes-hit" tabindex="0" onclick="pickItunes(${i})">
+        <img src="${artUrl}" alt="">
+        <div class="hit-info"><strong>${escapeHtml(r.trackName||'')}</strong>
+        <span>${escapeHtml(r.artistName||'')}${r.collectionName?' · '+escapeHtml(r.collectionName):''}</span></div>
+      </div>`;
+    }).join('');
+    window._itunesResults = data.results;
+  }catch(e){ statusEl.textContent = "couldn't reach iTunes — check your connection and try again"; }
+}
+function pickItunes(i){
+  const r = window._itunesResults[i];
+  if(!r) return;
+  document.getElementById('s-title').value = r.trackName || '';
+  document.getElementById('s-artist').value = r.artistName || '';
+  document.getElementById('s-album').value = r.collectionName || '';
+  document.getElementById('s-genre').value = r.primaryGenreName || '';
+  if(r.trackTimeMillis){
+    const totalSec = Math.round(r.trackTimeMillis/1000);
+    document.getElementById('s-duration').value = Math.floor(totalSec/60)+':'+String(totalSec%60).padStart(2,'0');
+  }
+  document.getElementById('itunes-results').innerHTML = '';
+  document.getElementById('itunes-status').textContent = 'filled in below — tap "add track" to save it';
+  document.getElementById('s-title').focus();
+}
+
+/* ---------- Spotify embeds ---------- */
+function parseSpotifyUrl(url){
+  if(!url) return null;
+  const m = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+  if(!m) return null;
+  return { type: m[1], id: m[2] };
+}
+function spotifyEmbedHtml(sp, uid){
+  if(!sp) return '';
+  return `<button class="play-toggle" onclick="toggleEmbed('${uid}')">▶ play</button>
+    <div class="spotify-embed" id="embed-${uid}" style="display:none;">
+      <iframe src="https://open.spotify.com/embed/${sp.type}/${sp.id}?utm_source=generator&theme=0" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>`;
+}
+function toggleEmbed(uid){
+  const el = document.getElementById('embed-'+uid);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+/* ---------- Confetti + shuffle ---------- */
+function spawnConfetti(){
+  const colors = ['#C6FF4D','#FF5D9E','#6FD3FF','#FFC15E'];
+  const cx = window.innerWidth/2, cy = window.innerHeight/3;
+  for(let i=0;i<16;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece'; p.style.left = cx+'px'; p.style.top = cy+'px';
+    p.style.background = colors[i % colors.length];
+    const angle = Math.random()*Math.PI*2; const dist = 60+Math.random()*90;
+    p.style.setProperty('--dx', Math.cos(angle)*dist+'px');
+    p.style.setProperty('--dy', Math.sin(angle)*dist+'px');
+    p.style.setProperty('--rot', (Math.random()*360)+'deg');
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 850);
+  }
+}
+function shuffleSpotlight(){
+  if(songs.length===0) return;
+  const i = Math.floor(Math.random()*songs.length);
+  const id = songs[i].id;
+  requestAnimationFrame(()=>{
+    const target = document.querySelector('#song-list .track[data-id="'+id+'"]');
+    if(target){
+      target.classList.add('spotlight');
+      target.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>target.classList.remove('spotlight'), 1400);
+    }
+  });
+}
+
+/* ---------- Tabs ---------- */
+function positionIndicator(side){
+  const btn = document.querySelector('.side-btn[data-side="'+side+'"]');
+  const ind = document.getElementById('side-indicator');
+  if(!btn || !ind) return;
+  ind.style.left = btn.offsetLeft + 'px'; ind.style.width = btn.offsetWidth + 'px';
+}
+function flipTo(side){
+  document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active', b.dataset.side===side));
+  ['A','B','C','D'].forEach(s=>document.getElementById('panel-'+s).classList.toggle('active', s===side));
+  positionIndicator(side);
+  if(side==='D') renderTapes();
+}
+window.addEventListener('resize', ()=>{
+  const active = document.querySelector('.side-btn.active');
+  if(active) positionIndicator(active.dataset.side);
+});
+document.addEventListener('DOMContentLoaded', ()=>positionIndicator('A'));
+
+/* ---------- Chips ---------- */
+function renderChips(containerId, items, filterVal, onClick){
+  const genres = [...new Set(items.map(i=>i.genre).filter(Boolean))];
+  const el = document.getElementById(containerId);
+  if(genres.length===0){ el.innerHTML=''; return; }
+  el.innerHTML = ['all', ...genres].map(g => {
+    const active = g===filterVal;
+    const color = g==='all' ? '#C6FF4D' : genreColor(g);
+    return `<button class="chip${active?' active':''}" style="${active?'background:'+color+';':''}" onclick="${onClick}('${g.replace(/'/g,"\\'")}')">${escapeHtml(g)}</button>`;
+  }).join('');
+}
+function setLibFilter(g){ libFilter=g; renderSongs(); }
+function setTalkFilter(g){ talkFilter=g; renderTalk(); }
+
+/* ---------- Engagement (likes + comments) ---------- */
+function engageHtml(type, id, item){
+  const likes = item.likes || 0;
+  const comments = item.comments || [];
+  const uid = type+'-'+id;
+  const commentRows = comments.length===0
+    ? '<p class="empty" style="padding:6px 0;">no comments yet</p>'
+    : comments.map(c=>`<div class="comment"><span class="c-name">${escapeHtml(c.name)}</span><span class="c-time">${escapeHtml(c.time)}</span><div class="c-text">${escapeHtml(c.text)}</div></div>`).join('');
+  return `<div class="engage-row">
+      <button class="like-btn" onclick="likeItem('${type}','${id}')">❤ <span>${likes}</span></button>
+      <button class="comment-toggle" onclick="toggleComments('${uid}')">💬 ${comments.length} comment${comments.length!==1?'s':''}</button>
+    </div>
+    <div class="comments-box" id="comments-${uid}">
+      ${commentRows}
+      <div class="comment-add">
+        <input type="text" class="c-name-input" id="cname-${uid}" placeholder="name">
+        <input type="text" class="c-text-input" id="ctext-${uid}" placeholder="say something…" onkeydown="if(event.key==='Enter'){event.preventDefault();addComment('${type}','${id}');}">
+        <button onclick="addComment('${type}','${id}')">reply</button>
+      </div>
+    </div>`;
+}
+function collFor(type){ return type==='journal' ? 'journal' : 'talk'; }
+function toggleComments(uid){
+  const el = document.getElementById('comments-'+uid);
+  if(el) el.classList.toggle('open');
+}
+function likeItem(type, id){
+  db.collection(collFor(type)).doc(id).update({ likes: firebase.firestore.FieldValue.increment(1) });
+}
+function addComment(type, id){
+  const uid = type+'-'+id;
+  const nameEl = document.getElementById('cname-'+uid);
+  const textEl = document.getElementById('ctext-'+uid);
+  const text = textEl.value.trim();
+  if(!text) return;
+  const comment = {
+    name: nameEl.value.trim() || 'anonymous', text: text,
+    time: new Date().toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  };
+  db.collection(collFor(type)).doc(id).update({ comments: firebase.firestore.FieldValue.arrayUnion(comment) });
+  textEl.value = '';
+}
+
+/* ---------- Render: Library ---------- */
+function renderSongs(){
+  renderChips('genre-chips-lib', songs, libFilter, 'setLibFilter');
+  const q = (document.getElementById('song-search').value||'').toLowerCase();
+  const filtered = songs.filter(s =>
+    (libFilter==='all' || s.genre===libFilter) &&
+    (s.title.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
+  );
+  const list = document.getElementById('song-list');
+  if(filtered.length===0){
+    list.innerHTML = `<p class="empty">${songs.length===0?'No tracks yet — sign in and add the first one.':'Nothing matches.'}</p>`;
+    return;
+  }
+  list.innerHTML = filtered.map((s,idx)=>{
+    const sp = parseSpotifyUrl(s.spotify);
+    const canDelete = currentUser && s.ownerUid === currentUser.uid;
+    return `<div class="track" data-id="${s.id}">
+      <span class="num">${String(idx+1).padStart(2,'0')}</span>
+      <span class="info"><strong>${escapeHtml(s.title)}</strong>
+      <span>${escapeHtml(s.artist||'')}${s.album?' · '+escapeHtml(s.album):''}
+      <span class="tag" style="background:${genreColor(s.genre)}">${escapeHtml(s.genre||'')}</span></span>
+      ${sp?spotifyEmbedHtml(sp,'song-'+s.id):''}</span>
+      <span class="dur">${escapeHtml(s.duration||'')}${canDelete?`<button class="del" onclick="deleteSong('${s.id}')">remove</button>`:''}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Journal ---------- */
+function renderJournal(){
+  const list = document.getElementById('journal-list');
+  if(journal.length===0){ list.innerHTML='<p class="empty">No entries yet.</p>'; return; }
+  list.innerHTML = journal.slice().reverse().map(e=>{
+    const canDelete = currentUser && e.ownerUid === currentUser.uid;
+    return `<div class="entry">
+      <span class="entry-date">${escapeHtml(e.date)}</span>
+      <h3>${escapeHtml(e.title)}</h3>
+      <p>${escapeHtml(e.body)}</p>
+      <span class="entry-author">— ${escapeHtml(e.ownerEmail||'')}</span>
+      ${canDelete?`<button class="del" onclick="deleteEntry('${e.id}')">remove</button>`:''}
+      ${engageHtml('journal', e.id, e)}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Talk ---------- */
+function renderTalk(){
+  renderChips('genre-chips-talk', talk, talkFilter, 'setTalkFilter');
+  const filtered = talk.filter(t => talkFilter==='all' || t.genre===talkFilter);
+  const list = document.getElementById('talk-list');
+  if(filtered.length===0){ list.innerHTML='<p class="empty">No posts yet — start the conversation.</p>'; return; }
+  list.innerHTML = filtered.slice().reverse().map(t=>{
+    const sp = parseSpotifyUrl(t.spotify);
+    const canDelete = currentUser && t.ownerUid === currentUser.uid;
+    return `<div class="post" style="border-left-color:${genreColor(t.genre)}">
+      <div class="post-head">
+        <span class="post-name">${escapeHtml(t.name)}</span>
+        <span class="tag" style="background:${genreColor(t.genre)}">${escapeHtml(t.genre)}</span>
+        <span class="post-time">${escapeHtml(t.time)}</span>
+        ${canDelete?`<button class="del" onclick="deleteTalk('${t.id}')">remove</button>`:''}
+      </div>
+      <p>${escapeHtml(t.body)}</p>
+      ${sp?spotifyEmbedHtml(sp,'talk-'+t.id):''}
+      ${engageHtml('talk', t.id, t)}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Mixtapes (local only) ---------- */
+function saveTapes(){ localStorage.setItem('rr_tapes', JSON.stringify(tapes)); }
+function renderTapes(){
+  const list = document.getElementById('tape-list');
+  if(tapes.length===0){ list.innerHTML='<p class="empty">No mixtapes yet — name one above to start.</p>'; return; }
+  const songOptions = songs.map((s)=>`<option value="${s.id}">${escapeHtml(s.title)} — ${escapeHtml(s.artist||'')}</option>`).join('');
+  list.innerHTML = tapes.map((tp,ti)=>{
+    const trackRows = tp.tracks.length===0
+      ? '<p class="empty" style="padding:8px 0;">no tracks added yet</p>'
+      : tp.tracks.map((t,tri)=>`<div class="tape-track">
+          <span><span class="tt-name">${escapeHtml(t.title)}</span><span class="tt-artist">${escapeHtml(t.artist||'')}</span></span>
+          <button class="del" onclick="removeTapeTrack(${ti},${tri})">remove</button>
+        </div>`).join('');
+    return `<div class="tape">
+      <div class="tape-head">
+        <span class="tape-name">${escapeHtml(tp.name)}</span>
+        <span class="tape-count">${tp.tracks.length} track${tp.tracks.length!==1?'s':''} <button class="del" onclick="deleteTape(${ti})">delete</button></span>
+      </div>
+      <div class="tape-tracks">${trackRows}</div>
+      ${songs.length>0 ? `<div class="tape-add">
+        <select id="tape-select-${ti}">${songOptions}</select>
+        <button onclick="addTapeTrack(${ti})">add</button>
+      </div>` : '<p class="empty" style="padding:4px 0;">add tracks to the Library first</p>'}
+    </div>`;
+  }).join('');
+}
+function addTapeTrack(ti){
+  const sel = document.getElementById('tape-select-'+ti);
+  const song = songs.find(s=>s.id===sel.value);
+  if(!song) return;
+  tapes[ti].tracks.push({ title: song.title, artist: song.artist });
+  renderTapes(); saveTapes();
+}
+function removeTapeTrack(ti, tri){ tapes[ti].tracks.splice(tri,1); renderTapes(); saveTapes(); }
+function deleteTape(ti){ tapes.splice(ti,1); renderTapes(); saveTapes(); }
+
+/* ---------- Form handlers ---------- */
+document.getElementById('song-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!currentUser) return;
+  db.collection('songs').add({
+    title: document.getElementById('s-title').value.trim(),
+    artist: document.getElementById('s-artist').value.trim(),
+    genre: document.getElementById('s-genre').value.trim(),
+    album: document.getElementById('s-album').value.trim(),
+    duration: document.getElementById('s-duration').value.trim(),
+    spotify: document.getElementById('s-spotify').value.trim(),
+    ownerUid: currentUser.uid, ownerEmail: currentUser.email,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset(); spawnConfetti();
+});
+
+document.getElementById('journal-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!currentUser) return;
+  db.collection('journal').add({
+    title: document.getElementById('j-title').value.trim(),
+    body: document.getElementById('j-body').value.trim(),
+    date: new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}),
+    ownerUid: currentUser.uid, ownerEmail: currentUser.email,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset();
+});
+
+document.getElementById('talk-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  db.collection('talk').add({
+    name: document.getElementById('t-name').value.trim(),
+    genre: document.getElementById('t-genre').value.trim(),
+    body: document.getElementById('t-body').value.trim(),
+    spotify: document.getElementById('t-spotify').value.trim(),
+    ownerUid: currentUser ? currentUser.uid : null,
+    time: new Date().toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset(); spawnConfetti();
+});
+
+document.getElementById('tape-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  tapes.push({ name: document.getElementById('tape-name').value.trim(), tracks: [] });
+  e.target.reset(); renderTapes(); saveTapes();
+});
+
+function deleteSong(id){ db.collection('songs').doc(id).delete(); }
+function deleteEntry(id){ db.collection('journal').doc(id).delete(); }
+function deleteTalk(id){ db.collection('talk').doc(id).delete(); }
+</script>
+</body>
+</html>
