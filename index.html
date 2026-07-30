@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Record Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#08090C; --ink-raised:#12161C; --ink-card:#171B22; --line:#232A34;
+    --paper:#F2F0EA; --muted:#7C8290;
+    --lime:#C6FF4D; --pink:#FF5D9E; --sky:#6FD3FF; --amber:#FFC15E;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--ink);}
+  body{
+    margin:0;background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(198,255,77,0.05), transparent 60%),
+      radial-gradient(ellipse 100% 50% at 50% 110%, rgba(255,93,158,0.04), transparent 60%),
+      var(--ink);
+    color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh; position:relative;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:0.035;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection{background:var(--lime);color:var(--ink);}
+  :focus-visible{outline:2px solid var(--lime);outline-offset:2px;}
+  .wrap{max-width:760px;margin:0 auto;padding:44px 20px 90px;position:relative;z-index:2;}
+
+  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:20px;}
+  .disc{
+    width:120px;height:120px;border-radius:50%;position:relative;margin-bottom:18px;
+    background:
+      repeating-radial-gradient(circle at center, #0000 0px, #0000 3px, rgba(198,255,77,0.07) 4px, #0000 5px),
+      radial-gradient(circle at center, var(--ink-card) 0 32%, #050608 32% 100%);
+    box-shadow:0 0 0 1px rgba(198,255,77,0.18), 0 0 40px rgba(198,255,77,0.16), 0 0 80px rgba(255,93,158,0.09);
+    display:flex;align-items:center;justify-content:center;
+    animation:spin-in 1s ease-out, slow-spin 40s linear infinite;
+  }
+  @keyframes spin-in{from{transform:rotate(-70deg);opacity:0;}to{transform:rotate(0);opacity:1;}}
+  @keyframes slow-spin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){ .disc{animation:none;} }
+  .disc-label{
+    width:50px;height:50px;border-radius:50%;background:var(--lime);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:10px;font-weight:500;
+  }
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;margin:0 0 6px;letter-spacing:-0.01em;}
+  .tagline{color:var(--muted);font-size:0.92rem;margin:0;}
+
+  /* Auth bar */
+  .auth-bar{
+    background:linear-gradient(145deg, var(--ink-card), var(--ink-raised));border:1px solid var(--line);border-radius:16px;
+    padding:16px;margin:22px 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:center;
+  }
+  .auth-heading{
+    width:100%;text-align:center;font-family:'Fraunces';font-weight:600;font-size:0.95rem;margin-bottom:8px;
+  }
+  .auth-heading .icon{color:var(--lime);margin-right:4px;}
+  .auth-sub{width:100%;text-align:center;font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--muted);margin:-4px 0 10px;}
+  .auth-signed{font-family:'IBM Plex Mono';font-size:0.78rem;color:var(--lime);}
+  .auth-btn{
+    background:var(--lime);color:var(--ink);border:none;border-radius:8px;padding:8px 16px;
+    font-family:'IBM Plex Mono';font-size:0.74rem;font-weight:500;cursor:pointer;transition:transform .15s;
+  }
+  .auth-btn:active{transform:scale(0.95);}
+  .auth-btn.secondary{background:var(--ink-raised);color:var(--paper);border:1px solid var(--line);}
+  .auth-form{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+  .auth-form input{
+    background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;
+    padding:9px 12px;font-family:'Inter';font-size:0.84rem;width:150px;
+  }
+  .auth-status{width:100%;text-align:center;font-family:'IBM Plex Mono';font-size:0.72rem;color:var(--pink);margin:8px 0 0;}
+  .gate-msg{
+    text-align:center;color:var(--muted);font-family:'IBM Plex Mono';font-size:0.76rem;
+    padding:14px;border:1px dashed var(--line);border-radius:12px;margin-bottom:22px;
+  }
+
+  .sides{
+    position:relative;display:flex;justify-content:center;margin:24px 0 30px;
+    background:var(--ink-raised);border-radius:999px;padding:4px;width:fit-content;margin-left:auto;margin-right:auto;
+    border:1px solid var(--line);
+  }
+  .side-btn{
+    position:relative;z-index:2;font-family:'IBM Plex Mono';font-size:0.7rem;letter-spacing:0.6px;
+    background:none;border:none;color:var(--muted);padding:9px 14px;border-radius:999px;cursor:pointer;transition:color .25s;
+  }
+  .side-btn.active{color:var(--ink);}
+  .side-indicator{
+    position:absolute;top:4px;bottom:4px;border-radius:999px;background:var(--lime);
+    transition:left .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1); z-index:1;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade-up .3s ease;}
+  @keyframes fade-up{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  h2.panel-title{font-family:'Fraunces',serif;font-size:1.28rem;font-weight:600;margin:0 0 4px;}
+  .panel-sub{color:var(--muted);font-size:0.84rem;margin:0 0 22px;}
+
+  form.card{
+    background:var(--ink-card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:22px;
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  form.card.single{grid-template-columns:1fr;}
+  form.card input, form.card textarea, form.card select{
+    background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    border-radius:9px;padding:10px 12px;font-family:'Inter';font-size:0.88rem;width:100%;
+  }
+  form.card textarea{resize:vertical;min-height:80px;}
+  form.card input::placeholder, form.card textarea::placeholder{color:var(--muted);}
+  .full{grid-column:1 / -1;}
+  .add-btn{
+    grid-column:1 / -1;justify-self:start;background:var(--lime);color:var(--ink);border:none;border-radius:9px;
+    padding:10px 18px;font-family:'IBM Plex Mono';font-size:0.76rem;font-weight:500;letter-spacing:0.5px;
+    cursor:pointer;margin-top:2px;transition:transform .15s, background .15s;
+  }
+  .add-btn:hover{background:#d4ff70;transform:translateY(-1px);}
+  .add-btn:active{transform:translateY(0);}
+  .add-btn:disabled{background:var(--line);color:var(--muted);cursor:not-allowed;transform:none;}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+  .chip{
+    font-family:'IBM Plex Mono';font-size:0.71rem;letter-spacing:0.3px;padding:6px 13px;border-radius:999px;
+    border:1px solid var(--line);background:var(--ink-raised);color:var(--muted);cursor:pointer;transition:all .15s;
+  }
+  .chip.active{color:var(--ink);border-color:transparent;}
+  .tag{display:inline-block;font-family:'IBM Plex Mono';font-size:0.66rem;padding:2px 9px;border-radius:999px;margin-left:6px;color:var(--ink);}
+
+  .search{margin-bottom:16px;}
+  .search input{
+    width:100%;background:var(--ink-card);border:1px solid var(--line);color:var(--paper);
+    border-radius:9px;padding:10px 14px;font-family:'Inter';font-size:0.88rem;
+  }
+
+  .itunes-box{background:linear-gradient(145deg, var(--ink-card), var(--ink-raised));border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:22px;}
+  .itunes-box .itunes-label{font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--sky);letter-spacing:0.6px;margin-bottom:10px;display:block;}
+  .itunes-row{display:flex;gap:8px;}
+  .itunes-row input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:9px;padding:10px 12px;font-family:'Inter';font-size:0.88rem;}
+  .itunes-row button{background:var(--sky);color:var(--ink);border:none;border-radius:9px;padding:0 16px;font-family:'IBM Plex Mono';font-size:0.74rem;font-weight:500;cursor:pointer;white-space:nowrap;}
+  .itunes-results{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+  .itunes-hit{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s;}
+  .itunes-hit:hover, .itunes-hit:focus{background:var(--ink-raised);border-color:var(--line);}
+  .itunes-hit img{width:36px;height:36px;border-radius:5px;flex-shrink:0;}
+  .itunes-hit .hit-info strong{display:block;font-size:0.85rem;font-family:'Inter';font-weight:600;}
+  .itunes-hit .hit-info span{font-size:0.74rem;color:var(--muted);}
+  .itunes-status{font-size:0.76rem;color:var(--muted);font-family:'IBM Plex Mono';margin-top:8px;}
+
+  .track{display:grid;grid-template-columns:36px 20px 1fr auto;gap:10px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);}
+  .track:last-child{border-bottom:none;}
+  .track .num{font-family:'IBM Plex Mono';color:var(--lime);font-size:0.8rem;}
+  .track .info strong{display:block;font-family:'Fraunces';font-weight:600;font-size:0.98rem;}
+  .track .info span{color:var(--muted);font-size:0.78rem;}
+  .track .dur{font-family:'IBM Plex Mono';color:var(--muted);font-size:0.8rem;white-space:nowrap;display:flex;align-items:center;}
+  .del{background:none;border:none;color:var(--pink);cursor:pointer;font-size:0.7rem;font-family:'IBM Plex Mono';margin-left:8px;}
+
+  .media-tile{border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 14px rgba(0,0,0,0.35);}
+  .media-tile img{width:100%;height:100%;object-fit:cover;display:block;}
+  .media-tile.tile-sm{width:36px;height:36px;font-size:1rem;border-radius:8px;}
+  .media-tile.tile-lg{width:72px;height:72px;font-size:1.8rem;border-radius:12px;}
+  .entry-head, .post-body-row{display:flex;gap:12px;align-items:flex-start;}
+  .entry-head-text, .post-body-text{flex:1;min-width:0;}
+  .art-preview{margin-top:10px;display:flex;align-items:center;gap:8px;}
+
+  .entry{padding:16px 0;border-bottom:1px solid var(--line);}
+  .entry:last-child{border-bottom:none;}
+  .entry-date{font-family:'IBM Plex Mono';font-size:0.7rem;color:var(--sky);letter-spacing:0.4px;display:inline-block;margin-bottom:6px;}
+  .entry h3{font-family:'Fraunces';font-weight:600;font-size:1.05rem;margin:0 0 6px;}
+  .entry p{color:var(--muted);font-size:0.88rem;line-height:1.55;margin:0 0 8px;white-space:pre-wrap;}
+  .entry-author{font-family:'IBM Plex Mono';font-size:0.66rem;color:var(--muted);}
+
+  .post{background:var(--ink-card);border:1px solid var(--line);border-left:3px solid var(--lime);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .post-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+  .post-name{font-family:'Fraunces';font-weight:600;font-size:0.92rem;}
+  .post-time{font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--muted);}
+  .post p{margin:0;font-size:0.88rem;line-height:1.5;color:var(--paper);white-space:pre-wrap;}
+
+  .tape{background:linear-gradient(160deg, var(--ink-card), var(--ink-raised));border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+  .tape-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .tape-name{font-family:'Fraunces';font-weight:600;font-size:1.05rem;}
+  .tape-count{font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--muted);}
+  .tape-tracks{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+  .tape-track{display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;padding:6px 0;border-bottom:1px solid var(--line);}
+  .tape-track:last-child{border-bottom:none;}
+  .tape-track .tt-name{color:var(--paper);}
+  .tape-track .tt-artist{color:var(--muted);font-size:0.74rem;margin-left:6px;}
+  .tape-add{display:flex;gap:8px;}
+  .tape-add select{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font-family:'Inter';font-size:0.82rem;}
+  .tape-add button{background:var(--amber);color:var(--ink);border:none;border-radius:8px;padding:0 14px;font-family:'IBM Plex Mono';font-size:0.72rem;font-weight:500;cursor:pointer;}
+
+  .empty{text-align:center;color:var(--muted);font-size:0.86rem;padding:28px 0;font-style:italic;}
+  .status{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:34px;font-family:'IBM Plex Mono';}
+  .notice{font-size:0.72rem;color:var(--muted);text-align:center;margin:-14px 0 20px;font-family:'IBM Plex Mono';}
+
+  .spotify-field{margin-bottom:2px;}
+  .play-toggle{background:none;border:1px solid var(--line);color:#1DB954;border-radius:999px;font-family:'IBM Plex Mono';font-size:0.68rem;padding:4px 10px;cursor:pointer;margin-left:6px;white-space:nowrap;transition:background .15s;}
+  .play-toggle:hover{background:var(--ink-raised);}
+  .spotify-embed{margin-top:8px;border-radius:12px;overflow:hidden;}
+  .spotify-embed iframe{display:block;width:100%;border:none;}
+
+  .shuffle-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+  .shuffle-btn{background:var(--ink-card);border:1px solid var(--line);color:var(--paper);border-radius:999px;padding:8px 16px;font-family:'IBM Plex Mono';font-size:0.72rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .15s;}
+  .shuffle-btn:active{transform:scale(0.94);}
+  .track.spotlight{animation:spotlight-pulse 1.4s ease;}
+  @keyframes spotlight-pulse{
+    0%{background:var(--ink-card);box-shadow:0 0 0 0 rgba(198,255,77,0);}
+    30%{background:var(--ink-raised);box-shadow:0 0 0 3px rgba(198,255,77,0.4);}
+    100%{background:transparent;box-shadow:0 0 0 0 rgba(198,255,77,0);}
+  }
+  .confetti-piece{position:fixed;width:7px;height:7px;border-radius:2px;pointer-events:none;z-index:999;animation:confetti-fly 0.8s ease-out forwards;}
+  @keyframes confetti-fly{0%{transform:translate(0,0) rotate(0deg);opacity:1;}100%{transform:translate(var(--dx), var(--dy)) rotate(var(--rot));opacity:0;}}
+
+  .engage-row{display:flex;align-items:center;gap:14px;margin-top:10px;}
+  .like-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 12px;font-family:'IBM Plex Mono';font-size:0.74rem;cursor:pointer;display:flex;align-items:center;gap:5px;transition:transform .15s;}
+  .like-btn:active{transform:scale(0.92);}
+  .comment-toggle{background:none;border:none;color:var(--sky);font-family:'IBM Plex Mono';font-size:0.74rem;cursor:pointer;}
+  .comments-box{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:none;}
+  .comments-box.open{display:block;}
+  .comment{padding:6px 0;font-size:0.82rem;}
+  .comment .c-name{font-family:'Fraunces';font-weight:600;color:var(--paper);}
+  .comment .c-time{font-family:'IBM Plex Mono';font-size:0.65rem;color:var(--muted);margin-left:6px;}
+  .comment .c-text{color:var(--muted);margin-top:2px;}
+  .comment-add{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .comment-add input{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px 10px;font-family:'Inter';font-size:0.78rem;}
+  .comment-add input.c-name-input{width:90px;flex-shrink:0;}
+  .comment-add input.c-text-input{flex:1;min-width:100px;}
+  .comment-add button{background:var(--sky);color:var(--ink);border:none;border-radius:8px;padding:0 12px;font-family:'IBM Plex Mono';font-size:0.7rem;cursor:pointer;}
+
+  /* Collapsible details toggle */
+  .details-toggle{
+    grid-column:1 / -1;background:none;border:none;color:var(--sky);font-family:'IBM Plex Mono';
+    font-size:0.72rem;cursor:pointer;text-align:left;padding:2px 0;
+  }
+  .details-fields{display:none;grid-column:1/-1;display:none;}
+  .details-fields.open{display:grid;grid-template-columns:1fr 1fr;gap:10px;grid-column:1/-1;}
+
+  .spotify-find{
+    grid-column:1/-1;font-family:'IBM Plex Mono';font-size:0.7rem;color:var(--muted);
+  }
+  .spotify-find a{color:#1DB954;}
+
+  @media (max-width:400px){
+    .side-btn{font-size:0.6rem;padding:8px 9px;letter-spacing:0.3px;}
+  }
+
+  /* Fact popup */
+  .fact-btn{
+    position:fixed;bottom:20px;right:20px;z-index:500;
+    width:52px;height:52px;border-radius:50%;background:var(--lime);color:var(--ink);
+    border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 20px rgba(198,255,77,0.35);
+    display:flex;align-items:center;justify-content:center;transition:transform .2s;
+  }
+  .fact-btn:active{transform:scale(0.9);}
+  .fact-overlay{
+    position:fixed;inset:0;background:rgba(5,6,8,0.85);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:600;padding:20px;
+  }
+  .fact-overlay.open{display:flex;}
+  .fact-card{
+    background:var(--ink-card);border:1px solid var(--line);border-radius:20px;padding:22px;
+    max-width:360px;width:100%;text-align:center;animation:fact-pop .3s ease;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  @keyframes fact-pop{from{opacity:0;transform:scale(0.92) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .fact-art{
+    width:132px;height:132px;border-radius:16px;margin:0 auto 18px;position:relative;
+    display:flex;align-items:center;justify-content:center;font-size:2rem;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+  .fact-art::after{
+    content:"";position:absolute;inset:0;border-radius:16px;
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 6px);
+  }
+  .fact-eyebrow{font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--sky);letter-spacing:1px;margin-bottom:8px;}
+  .fact-text{font-family:'Fraunces';font-size:1.05rem;line-height:1.45;color:var(--paper);margin-bottom:20px;}
+  .fact-actions{display:flex;gap:10px;justify-content:center;}
+  .fact-actions button{
+    font-family:'IBM Plex Mono';font-size:0.74rem;font-weight:500;border-radius:9px;padding:9px 16px;
+    cursor:pointer;border:none;transition:transform .15s;
+  }
+  .fact-actions button:active{transform:scale(0.94);}
+  .fact-next{background:var(--lime);color:var(--ink);}
+  .fact-close{background:var(--ink-raised);color:var(--paper);border:1px solid var(--line) !important;}
+
+  /* Mood matcher */
+  .mood-btn{
+    position:fixed;bottom:20px;left:20px;z-index:500;
+    width:52px;height:52px;border-radius:50%;background:var(--pink);color:var(--ink);
+    border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 20px rgba(255,93,158,0.35);
+    display:flex;align-items:center;justify-content:center;transition:transform .2s;
+  }
+  .mood-btn:active{transform:scale(0.9);}
+  .mood-card{max-width:380px;}
+  .mood-title{font-family:'Fraunces';font-weight:600;font-size:1.15rem;margin:0 0 6px;}
+  .mood-sub{font-family:'IBM Plex Mono';font-size:0.7rem;color:var(--muted);margin:0 0 18px;}
+  .mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+  .mood-chip{
+    background:var(--ink-raised);border:1px solid var(--line);color:var(--paper);border-radius:12px;
+    padding:12px 8px;font-family:'Inter';font-size:0.85rem;font-weight:500;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s, background .15s;
+  }
+  .mood-chip:active{transform:scale(0.95);}
+  .mood-chip .mood-emoji{font-size:1.4rem;}
+  .mood-result{display:none;}
+  .mood-result.show{display:block;}
+  .mood-song-title{font-family:'Fraunces';font-weight:600;font-size:1.1rem;margin:2px 0 4px;}
+  .mood-song-artist{font-family:'IBM Plex Mono';font-size:0.78rem;color:var(--muted);margin-bottom:10px;}
+  .mood-empty{font-family:'IBM Plex Mono';font-size:0.8rem;color:var(--muted);margin:14px 0;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="disc"><div class="disc-label">666</div></div>
+    <h1>The Record Room</h1>
+    <p class="tagline">Library. Journal. Talk. Mixtapes.</p>
+  </div>
+
+  <div class="auth-bar" id="auth-bar"></div>
+
+  <div class="sides" id="sides">
+    <div class="side-indicator" id="side-indicator"></div>
+    <button class="side-btn active" data-side="A" onclick="flipTo('A')">LIBRARY</button>
+    <button class="side-btn" data-side="B" onclick="flipTo('B')">JOURNAL</button>
+    <button class="side-btn" data-side="C" onclick="flipTo('C')">TALK</button>
+    <button class="side-btn" data-side="D" onclick="flipTo('D')">MIXTAPES</button>
+  </div>
+
+  <section class="panel active" id="panel-A">
+    <h2 class="panel-title">Library</h2>
+    <p class="panel-sub">Shared with everyone. Signed-in members can add tracks.</p>
+
+    <p class="gate-msg" id="gate-lib">🔒 Sign in above to add tracks — anyone can browse and listen.</p>
+
+    <div class="itunes-box" id="itunes-box">
+      <span class="itunes-label">SEARCH ITUNES — auto-fill a track</span>
+      <div class="itunes-row">
+        <input type="text" id="itunes-query" placeholder="Song or artist name…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchItunes();}">
+        <button type="button" onclick="searchItunes()">Search</button>
+      </div>
+      <div class="itunes-status" id="itunes-status"></div>
+      <div class="itunes-results" id="itunes-results"></div>
+    </div>
+
+    <form class="card" id="song-form">
+      <input type="text" id="s-title" placeholder="Track title" required class="full">
+      <input type="text" id="s-artist" placeholder="Artist" required class="full">
+      <button type="button" class="details-toggle" onclick="toggleDetails()">+ add genre, album, duration, Spotify link</button>
+      <div class="details-fields" id="details-fields">
+        <input type="text" id="s-genre" placeholder="Genre (e.g. indie, hyperpop)">
+        <input type="text" id="s-album" placeholder="Album">
+        <input type="text" id="s-duration" placeholder="Duration (mm:ss)">
+        <input type="text" id="s-spotify" placeholder="Spotify link (optional)">
+        <input type="hidden" id="s-art" value="">
+        <p class="spotify-find full" id="spotify-find-link"></p>
+      </div>
+      <button type="submit" class="add-btn">+ add track</button>
+    </form>
+
+    <div class="chips" id="genre-chips-lib"></div>
+    <div class="search"><input type="text" id="song-search" placeholder="Search title or artist…" oninput="renderSongs()"></div>
+    <div class="shuffle-row"><button type="button" class="shuffle-btn" onclick="shuffleSpotlight()">🎲 Shuffle</button></div>
+    <div id="song-list"></div>
+  </section>
+
+  <section class="panel" id="panel-B">
+    <h2 class="panel-title">Journal</h2>
+    <p class="panel-sub">Shared write-ups from signed-in members.</p>
+
+    <p class="gate-msg" id="gate-journal">🔒 Sign in above to write a journal entry.</p>
+
+    <form class="card single" id="journal-form">
+      <input type="text" id="j-title" placeholder="Entry title" required>
+      <textarea id="j-body" placeholder="What happened? What did you hear?" required></textarea>
+      <div class="itunes-box">
+        <span class="itunes-label">ATTACH ALBUM ART (optional) — search a song or album</span>
+        <div class="itunes-row">
+          <input type="text" id="art-query-journal" placeholder="Song, album, or artist…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchArt('journal');}">
+          <button type="button" onclick="searchArt('journal')">Search</button>
+        </div>
+        <div class="itunes-status" id="art-status-journal"></div>
+        <div class="itunes-results" id="art-results-journal"></div>
+        <div class="art-preview" id="art-preview-journal"></div>
+      </div>
+      <button type="submit" class="add-btn">+ add entry</button>
+    </form>
+    <div id="journal-list"></div>
+  </section>
+
+  <section class="panel" id="panel-C">
+    <h2 class="panel-title">Talk</h2>
+    <p class="panel-sub">Open floor — anyone can post, like, and comment.</p>
+
+    <form class="card" id="talk-form">
+      <input type="text" id="t-name" placeholder="Your name" required>
+      <input type="text" id="t-genre" placeholder="Genre tag" required>
+      <textarea id="t-body" placeholder="What's on your mind?" required class="full"></textarea>
+      <input type="text" id="t-spotify" placeholder="Spotify link (optional)" class="full spotify-field">
+      <div class="itunes-box full">
+        <span class="itunes-label">ATTACH ALBUM ART (optional) — search a song or album</span>
+        <div class="itunes-row">
+          <input type="text" id="art-query-talk" placeholder="Song, album, or artist…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchArt('talk');}">
+          <button type="button" onclick="searchArt('talk')">Search</button>
+        </div>
+        <div class="itunes-status" id="art-status-talk"></div>
+        <div class="itunes-results" id="art-results-talk"></div>
+        <div class="art-preview" id="art-preview-talk"></div>
+      </div>
+      <button type="submit" class="add-btn">+ post</button>
+    </form>
+
+    <div class="chips" id="genre-chips-talk"></div>
+    <div id="talk-list"></div>
+  </section>
+
+  <section class="panel" id="panel-D">
+    <h2 class="panel-title">Mixtapes</h2>
+    <p class="panel-sub">Pull tracks from the Library into a themed tape (saved on this device).</p>
+
+    <form class="card single" id="tape-form">
+      <input type="text" id="tape-name" placeholder="Mixtape name (e.g. late night drive)" required>
+      <button type="submit" class="add-btn">+ new mixtape</button>
+    </form>
+    <div id="tape-list"></div>
+  </section>
+
+  <p class="status" id="status">connecting…</p>
+</div>
+
+<button class="fact-btn" onclick="openFact()" title="Random music fact">🎵</button>
+<button class="mood-btn" onclick="openMood()" title="Find a song for your mood">🎭</button>
+
+<div class="fact-overlay" id="mood-overlay" onclick="if(event.target===this) closeMood()">
+  <div class="fact-card mood-card">
+    <div class="mood-picker" id="mood-picker">
+      <div class="mood-title">What's the mood?</div>
+      <p class="mood-sub">I'll pull something from the room's Library that fits.</p>
+      <div class="mood-grid" id="mood-grid"></div>
+    </div>
+    <div class="mood-result" id="mood-result">
+      <div class="fact-art" id="mood-art">🎵</div>
+      <div class="fact-eyebrow" id="mood-eyebrow">FOR WHEN YOU'RE FEELING</div>
+      <div class="mood-song-title" id="mood-song-title"></div>
+      <div class="mood-song-artist" id="mood-song-artist"></div>
+      <div id="mood-embed"></div>
+      <div class="fact-actions" style="margin-top:14px;">
+        <button class="fact-next" onclick="rerollMood()">🎲 try another</button>
+        <button class="fact-close" onclick="backToMoods()">change mood</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="fact-overlay" id="fact-overlay" onclick="if(event.target===this) closeFact()">
+  <div class="fact-card">
+    <div class="fact-art" id="fact-art">🎸</div>
+    <div class="fact-eyebrow">DID YOU KNOW</div>
+    <div class="fact-text" id="fact-text"></div>
+    <div class="fact-actions">
+      <button class="fact-next" onclick="showRandomFact()">🎲 another one</button>
+      <button class="fact-close" onclick="closeFact()">close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCruy4GNyzWGC3eDhOB9Kt9fj8c_D324MY",
+  authDomain: "record-room-9bfb7.firebaseapp.com",
+  projectId: "record-room-9bfb7",
+  storageBucket: "record-room-9bfb7.firebasestorage.app",
+  messagingSenderId: "441732426888",
+  appId: "1:441732426888:web:ed1d10a1861cb71d08033d",
+  measurementId: "G-SGKVL5YPC7"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+let songs = [], journal = [], talk = [];
+let tapes = JSON.parse(localStorage.getItem('rr_tapes')||'[]');
+let libFilter = 'all', talkFilter = 'all';
+const PALETTE = [ {bg:'#C6FF4D'}, {bg:'#FF5D9E'}, {bg:'#6FD3FF'}, {bg:'#FFC15E'} ];
+function genreColor(g){
+  const s = (g||'other').toLowerCase();
+  let h = 0; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % PALETTE.length;
+  return PALETTE[h].bg;
+}
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
+function timeAgo(ts){
+  if(!ts || !ts.toDate) return '';
+  const diffMs = Date.now() - ts.toDate().getTime();
+  const mins = Math.floor(diffMs/60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins+'m ago';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs+'h ago';
+  const days = Math.floor(hrs/24);
+  if(days < 7) return days+'d ago';
+  return ts.toDate().toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+
+/* ---------- Mood matcher (no external AI, uses the room's own Library) ---------- */
+const MOODS = {
+  happy:    { emoji:'😄', label:'Happy',      keywords:['pop','disco','funk','dance','happy','summer'] },
+  hyped:    { emoji:'⚡', label:'Hyped',      keywords:['edm','electronic','hip hop','hiphop','rap','dance','techno'] },
+  angry:    { emoji:'😤', label:'Angry',      keywords:['metal','punk','hardcore','rock','grunge'] },
+  chill:    { emoji:'😌', label:'Chill',      keywords:['lo-fi','lofi','chill','jazz','ambient','indie','acoustic'] },
+  sad:      { emoji:'😔', label:'Sad',        keywords:['blues','sad','ballad','folk'] },
+  nostalgic:{ emoji:'🌇', label:'Nostalgic',  keywords:['classic rock','oldies','80s','90s','retro','soul'] },
+  romantic: { emoji:'💗', label:'Romantic',   keywords:['r&b','rnb','soul','love','romantic'] },
+  heartbroken:{ emoji:'💔', label:'Heartbroken', keywords:['sad','blues','ballad','soul','acoustic'] }
+};
+let currentMood = null;
+
+function renderMoodGrid(){
+  const grid = document.getElementById('mood-grid');
+  grid.innerHTML = Object.keys(MOODS).map(key => {
+    const m = MOODS[key];
+    return `<button class="mood-chip" onclick="pickMood('${key}')"><span class="mood-emoji">${m.emoji}</span>${m.label}</button>`;
+  }).join('');
+}
+
+function findSongForMood(moodKey){
+  const m = MOODS[moodKey];
+  const matches = songs.filter(s => {
+    const g = (s.genre||'').toLowerCase();
+    return m.keywords.some(kw => g.includes(kw));
+  });
+  if(matches.length > 0) return { song: matches[Math.floor(Math.random()*matches.length)], matched:true };
+  if(songs.length > 0) return { song: songs[Math.floor(Math.random()*songs.length)], matched:false };
+  return null;
+}
+
+function renderMoodResult(moodKey){
+  const m = MOODS[moodKey];
+  const picked = findSongForMood(moodKey);
+  document.getElementById('mood-picker').style.display = 'none';
+  document.getElementById('mood-result').classList.add('show');
+  document.getElementById('mood-eyebrow').textContent = 'FOR WHEN YOU\'RE FEELING ' + m.label.toUpperCase();
+  const art = document.getElementById('mood-art');
+  const embedEl = document.getElementById('mood-embed');
+  if(!picked){
+    art.style.background = 'linear-gradient(135deg, var(--ink-raised), var(--ink-card))';
+    art.textContent = m.emoji;
+    document.getElementById('mood-song-title').textContent = 'Nothing in the Library yet';
+    document.getElementById('mood-song-artist').textContent = 'Sign in and add a track to get this started.';
+    embedEl.innerHTML = '';
+    return;
+  }
+  const s = picked.song;
+  if(s.art){
+    art.style.background = 'none';
+    art.innerHTML = `<img src="${s.art}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
+  } else {
+    const [c1,c2] = factArtColors(s.title + (s.artist||''));
+    art.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+    art.innerHTML = '🎵';
+  }
+  document.getElementById('mood-song-title').textContent = s.title;
+  document.getElementById('mood-song-artist').textContent = (s.artist||'') + (picked.matched ? '' : ' · closest thing we\'ve got');
+  const sp = parseSpotifyUrl(s.spotify);
+  embedEl.innerHTML = sp ? spotifyEmbedHtml(sp, 'mood-'+s.id) : '';
+}
+
+function pickMood(key){
+  currentMood = key;
+  renderMoodResult(key);
+}
+function rerollMood(){ if(currentMood) renderMoodResult(currentMood); }
+function backToMoods(){
+  document.getElementById('mood-result').classList.remove('show');
+  document.getElementById('mood-picker').style.display = 'block';
+}
+function openMood(){
+  renderMoodGrid();
+  document.getElementById('mood-result').classList.remove('show');
+  document.getElementById('mood-picker').style.display = 'block';
+  document.getElementById('mood-overlay').classList.add('open');
+}
+function closeMood(){
+  document.getElementById('mood-overlay').classList.remove('open');
+}
+
+/* ---------- Music Fact popup ---------- */
+const MUSIC_FACTS = [
+  { icon:'🎙️', text: 'DJ Alan Freed helped popularize the term "rock and roll" in the early 1950s to describe rhythm-and-blues music reaching younger, wider audiences.' },
+  { icon:'🎤', text: "Elvis Presley's first single, \"That's All Right,\" was recorded at Sun Studio in Memphis in 1954." },
+  { icon:'🎼', text: 'The Beatles hold the record for the most number-one hits on the US Billboard Hot 100 by any group in history.' },
+  { icon:'💿', text: 'Vinyl LPs spin at 33⅓ RPM, while most vinyl singles spin at 45 RPM.' },
+  { icon:'🎸', text: 'Jimi Hendrix was left-handed and famously played a right-handed Stratocaster flipped upside down and restrung.' },
+  { icon:'🏕️', text: 'The original Woodstock festival in 1969 drew an estimated 400,000 people to a dairy farm in New York.' },
+  { icon:'📀', text: "Led Zeppelin's fourth album has no title or band name printed on its cover — fans nicknamed it \"Led Zeppelin IV.\"" },
+  { icon:'👑', text: 'Queen\'s "Bohemian Rhapsody" returned to the UK #1 spot decades after its original release, following Freddie Mercury\'s death.' },
+  { icon:'🥁', text: 'Punk rock emerged in the mid-1970s partly as a stripped-down reaction against the grand scale of arena rock.' },
+  { icon:'🎵', text: 'The Rolling Stones took their band name from a Muddy Waters song.' },
+  { icon:'✨', text: "David Bowie retired his Ziggy Stardust persona live on stage in 1973 — a surprise even to his own backing band." },
+  { icon:'🕺', text: 'The moonwalk predates Michael Jackson, but his 1983 TV performance made it a global phenomenon.' },
+  { icon:'📼', text: 'The cassette tape was originally developed by Philips in 1963 for office dictation, not music.' },
+  { icon:'🎧', text: 'The Grateful Dead famously let fans record their live shows, fueling a massive underground tape-trading culture.' },
+  { icon:'🔊', text: '"Smells Like Teen Spirit" is often credited with pushing grunge into the mainstream in 1991.' },
+  { icon:'💔', text: "Fleetwood Mac recorded \"Rumours\" while several band members were breaking up with each other." },
+  { icon:'⚡', text: 'Guitar feedback, once seen as a mistake, became a deliberate artistic tool through players like Hendrix and The Who\'s Pete Townshend.' },
+  { icon:'🔥', text: "Deep Purple's \"Smoke on the Water\" was inspired by a real casino fire in Montreux, Switzerland." },
+  { icon:'🎹', text: 'Vinyl record sales have surged since the 2010s, at times even outselling CDs.' },
+  { icon:'🎺', text: 'The Isle of Wight Festival in 1970 drew a larger crowd than the original Woodstock the year before.' }
+];
+let lastFactIndex = -1;
+function factArtColors(seed){
+  let h = 0; for(let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) % PALETTE.length;
+  const c1 = PALETTE[h].bg;
+  const c2 = PALETTE[(h+2) % PALETTE.length].bg;
+  return [c1, c2];
+}
+function showRandomFact(){
+  let i;
+  do{ i = Math.floor(Math.random()*MUSIC_FACTS.length); } while(i===lastFactIndex && MUSIC_FACTS.length>1);
+  lastFactIndex = i;
+  const f = MUSIC_FACTS[i];
+  const [c1,c2] = factArtColors(f.text);
+  const art = document.getElementById('fact-art');
+  art.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+  art.textContent = f.icon;
+  document.getElementById('fact-text').textContent = f.text;
+}
+function openFact(){
+  showRandomFact();
+  document.getElementById('fact-overlay').classList.add('open');
+}
+function closeFact(){
+  document.getElementById('fact-overlay').classList.remove('open');
+}
+if(!sessionStorage.getItem('rr_fact_shown')){
+  sessionStorage.setItem('rr_fact_shown','1');
+  setTimeout(openFact, 1800);
+}
+
+/* ---------- AUTH ---------- */
+const FRIENDLY_ERRORS = {
+  'auth/invalid-email': "That email doesn't look quite right.",
+  'auth/missing-password': 'Enter a password.',
+  'auth/weak-password': 'Password needs to be at least 6 characters.',
+  'auth/email-already-in-use': 'That email already has an account — try logging in instead.',
+  'auth/invalid-credential': "Email or password didn't match — try again.",
+  'auth/wrong-password': "That password isn't right.",
+  'auth/user-not-found': "No account with that email yet — try signing up.",
+  'auth/too-many-requests': 'Too many tries — wait a minute and try again.'
+};
+function friendlyAuthError(e){ return FRIENDLY_ERRORS[e.code] || "Something went wrong — try again."; }
+
+function signUp(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-password').value;
+  auth.createUserWithEmailAndPassword(email, pass).catch(e=>{ document.getElementById('auth-status').textContent = friendlyAuthError(e); });
+}
+function logIn(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-password').value;
+  auth.signInWithEmailAndPassword(email, pass).catch(e=>{ document.getElementById('auth-status').textContent = friendlyAuthError(e); });
+}
+function logOut(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  currentUser = user;
+  renderAuthBar();
+  const gateLib = document.getElementById('gate-lib');
+  const gateJournal = document.getElementById('gate-journal');
+  const songForm = document.getElementById('song-form');
+  const journalForm = document.getElementById('journal-form');
+  const itunesBox = document.getElementById('itunes-box');
+  if(user){
+    gateLib.style.display='none'; gateJournal.style.display='none';
+    songForm.style.display='grid'; journalForm.style.display='grid'; itunesBox.style.display='block';
+  } else {
+    gateLib.style.display='block'; gateJournal.style.display='block';
+    songForm.style.display='none'; journalForm.style.display='none'; itunesBox.style.display='none';
+  }
+});
+
+function renderAuthBar(){
+  const bar = document.getElementById('auth-bar');
+  if(currentUser){
+    bar.innerHTML = `<span class="auth-signed">🎧 Signed in as ${escapeHtml(currentUser.email)}</span><button class="auth-btn secondary" onclick="logOut()">log out</button>`;
+  } else {
+    bar.innerHTML = `<span class="auth-heading"><span class="icon">●</span>Join the Room</span>
+    <span class="auth-sub">Sign up to add tracks and journal entries — browsing and Talk stay open to everyone.</span>
+    <div class="auth-form">
+      <input type="email" id="auth-email" placeholder="email">
+      <input type="password" id="auth-password" placeholder="password">
+      <button class="auth-btn" onclick="signUp()">sign up</button>
+      <button class="auth-btn secondary" onclick="logIn()">log in</button>
+    </div><p class="auth-status" id="auth-status"></p>`;
+  }
+}
+
+/* ---------- FIRESTORE LISTENERS (shared, realtime) ---------- */
+db.collection('songs').orderBy('createdAt').onSnapshot(snap=>{
+  songs = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderSongs(); renderTapes();
+  document.getElementById('status').textContent = 'live · shared with everyone';
+}, err=>{ document.getElementById('status').textContent = 'connection issue — check Firestore rules'; });
+
+db.collection('journal').orderBy('createdAt').onSnapshot(snap=>{
+  journal = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderJournal();
+});
+
+db.collection('talk').orderBy('createdAt').onSnapshot(snap=>{
+  talk = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  renderTalk();
+});
+
+/* ---------- iTunes search ---------- */
+function toggleDetails(){
+  const el = document.getElementById('details-fields');
+  el.classList.toggle('open');
+}
+
+function mediaTileHtml(artUrl, seed, sizeClass){
+  if(artUrl){
+    return `<div class="media-tile ${sizeClass}"><img src="${artUrl}" alt="" loading="lazy"></div>`;
+  }
+  const [c1,c2] = factArtColors(seed || 'x');
+  return `<div class="media-tile ${sizeClass}" style="background:linear-gradient(135deg, ${c1}, ${c2});">🎵</div>`;
+}
+
+window._artResults = {};
+async function searchArt(scope){
+  const q = document.getElementById('art-query-'+scope).value.trim();
+  const statusEl = document.getElementById('art-status-'+scope);
+  const resultsEl = document.getElementById('art-results-'+scope);
+  if(!q){ statusEl.textContent=''; resultsEl.innerHTML=''; return; }
+  statusEl.textContent = 'searching…'; resultsEl.innerHTML = '';
+  try{
+    const res = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=album&limit=6');
+    const data = await res.json();
+    if(!data.results || data.results.length===0){ statusEl.textContent = 'no matches found'; return; }
+    window._artResults[scope] = data.results;
+    statusEl.textContent = data.results.length + ' result' + (data.results.length>1?'s':'') + ' — tap one to attach';
+    resultsEl.innerHTML = data.results.map((r,i) => {
+      const art = (r.artworkUrl100||'').replace('http://','https://');
+      return `<div class="itunes-hit" tabindex="0" onclick="pickArt('${scope}',${i})">
+        <img src="${art}" alt="">
+        <div class="hit-info"><strong>${escapeHtml(r.collectionName||'')}</strong>
+        <span>${escapeHtml(r.artistName||'')}</span></div>
+      </div>`;
+    }).join('');
+  }catch(e){ statusEl.textContent = "couldn't reach iTunes — try again"; }
+}
+function pickArt(scope, i){
+  const r = window._artResults[scope][i];
+  if(!r) return;
+  const hi = (r.artworkUrl100||'').replace('100x100bb','600x600bb').replace('http://','https://');
+  document.getElementById('art-results-'+scope).innerHTML = '';
+  document.getElementById('art-status-'+scope).textContent = 'attached: ' + (r.collectionName||'');
+  const preview = document.getElementById('art-preview-'+scope);
+  preview.innerHTML = `<div class="media-tile tile-sm"><img src="${hi}" alt=""></div><span style="font-family:'IBM Plex Mono';font-size:0.72rem;color:var(--muted);">will show on this ${scope==='journal'?'entry':'post'}</span>`;
+  preview.dataset.url = hi;
+}
+
+async function searchItunes(){
+  const q = document.getElementById('itunes-query').value.trim();
+  const statusEl = document.getElementById('itunes-status');
+  const resultsEl = document.getElementById('itunes-results');
+  if(!q){ statusEl.textContent=''; resultsEl.innerHTML=''; return; }
+  statusEl.textContent = 'searching…'; resultsEl.innerHTML = '';
+  try{
+    const res = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=song&limit=6');
+    const data = await res.json();
+    if(!data.results || data.results.length===0){ statusEl.textContent = 'no matches found'; return; }
+    statusEl.textContent = data.results.length + ' result' + (data.results.length>1?'s':'') + ' — tap one to fill the form';
+    resultsEl.innerHTML = data.results.map((r,i) => {
+      const artUrl = (r.artworkUrl60||'').replace('http://','https://');
+      return `<div class="itunes-hit" tabindex="0" onclick="pickItunes(${i})">
+        <img src="${artUrl}" alt="">
+        <div class="hit-info"><strong>${escapeHtml(r.trackName||'')}</strong>
+        <span>${escapeHtml(r.artistName||'')}${r.collectionName?' · '+escapeHtml(r.collectionName):''}</span></div>
+      </div>`;
+    }).join('');
+    window._itunesResults = data.results;
+  }catch(e){ statusEl.textContent = "couldn't reach iTunes — check your connection and try again"; }
+}
+function pickItunes(i){
+  const r = window._itunesResults[i];
+  if(!r) return;
+  document.getElementById('s-title').value = r.trackName || '';
+  document.getElementById('s-artist').value = r.artistName || '';
+  document.getElementById('s-album').value = r.collectionName || '';
+  document.getElementById('s-genre').value = r.primaryGenreName || '';
+  if(r.trackTimeMillis){
+    const totalSec = Math.round(r.trackTimeMillis/1000);
+    document.getElementById('s-duration').value = Math.floor(totalSec/60)+':'+String(totalSec%60).padStart(2,'0');
+  }
+  document.getElementById('itunes-results').innerHTML = '';
+  document.getElementById('itunes-status').textContent = 'filled in below — tap "add track" to save it';
+  document.getElementById('details-fields').classList.add('open');
+  const hiArt = (r.artworkUrl100||'').replace('100x100bb','600x600bb').replace('http://','https://');
+  document.getElementById('s-art').value = hiArt;
+  const query = encodeURIComponent((r.trackName||'') + ' ' + (r.artistName||''));
+  document.getElementById('spotify-find-link').innerHTML =
+    `Got the details — <a href="https://open.spotify.com/search/${query}" target="_blank" rel="noopener">find it on Spotify ↗</a> and paste the track link above if you want it playable.`;
+  document.getElementById('s-title').focus();
+}
+
+/* ---------- Spotify embeds ---------- */
+function parseSpotifyUrl(url){
+  if(!url) return null;
+  const m = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+  if(!m) return null;
+  return { type: m[1], id: m[2] };
+}
+function spotifyEmbedHtml(sp, uid){
+  if(!sp) return '';
+  return `<button class="play-toggle" onclick="toggleEmbed('${uid}')">▶ play</button>
+    <div class="spotify-embed" id="embed-${uid}" style="display:none;">
+      <iframe src="https://open.spotify.com/embed/${sp.type}/${sp.id}?utm_source=generator&theme=0" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>`;
+}
+function toggleEmbed(uid){
+  const el = document.getElementById('embed-'+uid);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+/* ---------- Confetti + shuffle ---------- */
+function spawnConfetti(){
+  const colors = ['#C6FF4D','#FF5D9E','#6FD3FF','#FFC15E'];
+  const cx = window.innerWidth/2, cy = window.innerHeight/3;
+  for(let i=0;i<16;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece'; p.style.left = cx+'px'; p.style.top = cy+'px';
+    p.style.background = colors[i % colors.length];
+    const angle = Math.random()*Math.PI*2; const dist = 60+Math.random()*90;
+    p.style.setProperty('--dx', Math.cos(angle)*dist+'px');
+    p.style.setProperty('--dy', Math.sin(angle)*dist+'px');
+    p.style.setProperty('--rot', (Math.random()*360)+'deg');
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 850);
+  }
+}
+function shuffleSpotlight(){
+  if(songs.length===0) return;
+  const i = Math.floor(Math.random()*songs.length);
+  const id = songs[i].id;
+  requestAnimationFrame(()=>{
+    const target = document.querySelector('#song-list .track[data-id="'+id+'"]');
+    if(target){
+      target.classList.add('spotlight');
+      target.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>target.classList.remove('spotlight'), 1400);
+    }
+  });
+}
+
+/* ---------- Tabs ---------- */
+function positionIndicator(side){
+  const btn = document.querySelector('.side-btn[data-side="'+side+'"]');
+  const ind = document.getElementById('side-indicator');
+  if(!btn || !ind) return;
+  ind.style.left = btn.offsetLeft + 'px'; ind.style.width = btn.offsetWidth + 'px';
+}
+function flipTo(side){
+  document.querySelectorAll('.side-btn').forEach(b=>b.classList.toggle('active', b.dataset.side===side));
+  ['A','B','C','D'].forEach(s=>document.getElementById('panel-'+s).classList.toggle('active', s===side));
+  positionIndicator(side);
+  if(side==='D') renderTapes();
+}
+window.addEventListener('resize', ()=>{
+  const active = document.querySelector('.side-btn.active');
+  if(active) positionIndicator(active.dataset.side);
+});
+document.addEventListener('DOMContentLoaded', ()=>positionIndicator('A'));
+
+/* ---------- Chips ---------- */
+function renderChips(containerId, items, filterVal, onClick){
+  const genres = [...new Set(items.map(i=>i.genre).filter(Boolean))];
+  const el = document.getElementById(containerId);
+  if(genres.length===0){ el.innerHTML=''; return; }
+  el.innerHTML = ['all', ...genres].map(g => {
+    const active = g===filterVal;
+    const color = g==='all' ? '#C6FF4D' : genreColor(g);
+    return `<button class="chip${active?' active':''}" style="${active?'background:'+color+';':''}" onclick="${onClick}('${g.replace(/'/g,"\\'")}')">${escapeHtml(g)}</button>`;
+  }).join('');
+}
+function setLibFilter(g){ libFilter=g; renderSongs(); }
+function setTalkFilter(g){ talkFilter=g; renderTalk(); }
+
+/* ---------- Engagement (likes + comments) ---------- */
+function engageHtml(type, id, item){
+  const likes = item.likes || 0;
+  const comments = item.comments || [];
+  const uid = type+'-'+id;
+  const commentRows = comments.length===0
+    ? '<p class="empty" style="padding:6px 0;">no comments yet</p>'
+    : comments.map(c=>`<div class="comment"><span class="c-name">${escapeHtml(c.name)}</span><span class="c-time">${escapeHtml(c.time)}</span><div class="c-text">${escapeHtml(c.text)}</div></div>`).join('');
+  return `<div class="engage-row">
+      <button class="like-btn" onclick="likeItem('${type}','${id}')">❤ <span>${likes}</span></button>
+      <button class="comment-toggle" onclick="toggleComments('${uid}')">💬 ${comments.length} comment${comments.length!==1?'s':''}</button>
+    </div>
+    <div class="comments-box" id="comments-${uid}">
+      ${commentRows}
+      <div class="comment-add">
+        <input type="text" class="c-name-input" id="cname-${uid}" placeholder="name">
+        <input type="text" class="c-text-input" id="ctext-${uid}" placeholder="say something…" onkeydown="if(event.key==='Enter'){event.preventDefault();addComment('${type}','${id}');}">
+        <button onclick="addComment('${type}','${id}')">reply</button>
+      </div>
+    </div>`;
+}
+function collFor(type){ return type==='journal' ? 'journal' : 'talk'; }
+function toggleComments(uid){
+  const el = document.getElementById('comments-'+uid);
+  if(el) el.classList.toggle('open');
+}
+function likeItem(type, id){
+  db.collection(collFor(type)).doc(id).update({ likes: firebase.firestore.FieldValue.increment(1) });
+}
+function addComment(type, id){
+  const uid = type+'-'+id;
+  const nameEl = document.getElementById('cname-'+uid);
+  const textEl = document.getElementById('ctext-'+uid);
+  const text = textEl.value.trim();
+  if(!text) return;
+  const comment = {
+    name: nameEl.value.trim() || 'anonymous', text: text,
+    time: new Date().toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  };
+  db.collection(collFor(type)).doc(id).update({ comments: firebase.firestore.FieldValue.arrayUnion(comment) });
+  textEl.value = '';
+}
+
+/* ---------- Render: Library ---------- */
+function renderSongs(){
+  renderChips('genre-chips-lib', songs, libFilter, 'setLibFilter');
+  const q = (document.getElementById('song-search').value||'').toLowerCase();
+  const filtered = songs.filter(s =>
+    (libFilter==='all' || s.genre===libFilter) &&
+    (s.title.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
+  );
+  const list = document.getElementById('song-list');
+  if(filtered.length===0){
+    list.innerHTML = `<p class="empty">${songs.length===0?'No tracks yet — sign in and add the first one.':'Nothing matches.'}</p>`;
+    return;
+  }
+  list.innerHTML = filtered.map((s,idx)=>{
+    const sp = parseSpotifyUrl(s.spotify);
+    const canDelete = currentUser && s.ownerUid === currentUser.uid;
+    return `<div class="track" data-id="${s.id}">
+      ${mediaTileHtml(s.art, s.title+(s.artist||''), 'tile-sm')}
+      <span class="num">${String(idx+1).padStart(2,'0')}</span>
+      <span class="info"><strong>${escapeHtml(s.title)}</strong>
+      <span>${escapeHtml(s.artist||'')}${s.album?' · '+escapeHtml(s.album):''}
+      ${s.genre?`<span class="tag" style="background:${genreColor(s.genre)}">${escapeHtml(s.genre)}</span>`:''}</span>
+      ${sp?spotifyEmbedHtml(sp,'song-'+s.id):''}</span>
+      <span class="dur">${escapeHtml(s.duration||'')}${canDelete?`<button class="del" onclick="deleteSong('${s.id}')">remove</button>`:''}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Journal ---------- */
+function renderJournal(){
+  const list = document.getElementById('journal-list');
+  if(journal.length===0){ list.innerHTML='<p class="empty">No entries yet.</p>'; return; }
+  list.innerHTML = journal.slice().reverse().map(e=>{
+    const canDelete = currentUser && e.ownerUid === currentUser.uid;
+    const when = timeAgo(e.createdAt) || e.date;
+    return `<div class="entry">
+      <div class="entry-head">
+        ${mediaTileHtml(e.art, e.title, 'tile-lg')}
+        <div class="entry-head-text">
+          <span class="entry-date">${escapeHtml(when)}</span>
+          <h3>${escapeHtml(e.title)}</h3>
+        </div>
+      </div>
+      <p>${escapeHtml(e.body)}</p>
+      <span class="entry-author">— ${escapeHtml(e.ownerEmail||'')}</span>
+      ${canDelete?`<button class="del" onclick="deleteEntry('${e.id}')">remove</button>`:''}
+      ${engageHtml('journal', e.id, e)}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Talk ---------- */
+function renderTalk(){
+  renderChips('genre-chips-talk', talk, talkFilter, 'setTalkFilter');
+  const filtered = talk.filter(t => talkFilter==='all' || t.genre===talkFilter);
+  const list = document.getElementById('talk-list');
+  if(filtered.length===0){ list.innerHTML='<p class="empty">No posts yet — start the conversation.</p>'; return; }
+  list.innerHTML = filtered.slice().reverse().map(t=>{
+    const sp = parseSpotifyUrl(t.spotify);
+    const canDelete = !!currentUser;
+    const when = timeAgo(t.createdAt) || t.time;
+    return `<div class="post" style="border-left-color:${genreColor(t.genre)}">
+      <div class="post-body-row">
+        ${mediaTileHtml(t.art, t.body, 'tile-lg')}
+        <div class="post-body-text">
+          <div class="post-head">
+            <span class="post-name">${escapeHtml(t.name)}</span>
+            <span class="tag" style="background:${genreColor(t.genre)}">${escapeHtml(t.genre)}</span>
+            <span class="post-time">${escapeHtml(when)}</span>
+            ${canDelete?`<button class="del" onclick="deleteTalk('${t.id}')">remove</button>`:''}
+          </div>
+          <p>${escapeHtml(t.body)}</p>
+          ${sp?spotifyEmbedHtml(sp,'talk-'+t.id):''}
+        </div>
+      </div>
+      ${engageHtml('talk', t.id, t)}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render: Mixtapes (local only) ---------- */
+function saveTapes(){ localStorage.setItem('rr_tapes', JSON.stringify(tapes)); }
+function renderTapes(){
+  const list = document.getElementById('tape-list');
+  if(tapes.length===0){ list.innerHTML='<p class="empty">No mixtapes yet — name one above to start.</p>'; return; }
+  const songOptions = songs.map((s)=>`<option value="${s.id}">${escapeHtml(s.title)} — ${escapeHtml(s.artist||'')}</option>`).join('');
+  list.innerHTML = tapes.map((tp,ti)=>{
+    const trackRows = tp.tracks.length===0
+      ? '<p class="empty" style="padding:8px 0;">no tracks added yet</p>'
+      : tp.tracks.map((t,tri)=>`<div class="tape-track">
+          <span><span class="tt-name">${escapeHtml(t.title)}</span><span class="tt-artist">${escapeHtml(t.artist||'')}</span></span>
+          <button class="del" onclick="removeTapeTrack(${ti},${tri})">remove</button>
+        </div>`).join('');
+    return `<div class="tape">
+      <div class="tape-head">
+        <span class="tape-name">${escapeHtml(tp.name)}</span>
+        <span class="tape-count">${tp.tracks.length} track${tp.tracks.length!==1?'s':''} <button class="del" onclick="deleteTape(${ti})">delete</button></span>
+      </div>
+      <div class="tape-tracks">${trackRows}</div>
+      ${songs.length>0 ? `<div class="tape-add">
+        <select id="tape-select-${ti}">${songOptions}</select>
+        <button onclick="addTapeTrack(${ti})">add</button>
+      </div>` : '<p class="empty" style="padding:4px 0;">add tracks to the Library first</p>'}
+    </div>`;
+  }).join('');
+}
+function addTapeTrack(ti){
+  const sel = document.getElementById('tape-select-'+ti);
+  const song = songs.find(s=>s.id===sel.value);
+  if(!song) return;
+  tapes[ti].tracks.push({ title: song.title, artist: song.artist });
+  renderTapes(); saveTapes();
+}
+function removeTapeTrack(ti, tri){ tapes[ti].tracks.splice(tri,1); renderTapes(); saveTapes(); }
+function deleteTape(ti){ tapes.splice(ti,1); renderTapes(); saveTapes(); }
+
+/* ---------- Form handlers ---------- */
+document.getElementById('song-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!currentUser) return;
+  db.collection('songs').add({
+    title: document.getElementById('s-title').value.trim(),
+    artist: document.getElementById('s-artist').value.trim(),
+    genre: document.getElementById('s-genre').value.trim(),
+    album: document.getElementById('s-album').value.trim(),
+    duration: document.getElementById('s-duration').value.trim(),
+    spotify: document.getElementById('s-spotify').value.trim(),
+    art: document.getElementById('s-art').value.trim(),
+    ownerUid: currentUser.uid, ownerEmail: currentUser.email,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset(); spawnConfetti();
+});
+
+document.getElementById('journal-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!currentUser) return;
+  const artPreview = document.getElementById('art-preview-journal');
+  db.collection('journal').add({
+    title: document.getElementById('j-title').value.trim(),
+    body: document.getElementById('j-body').value.trim(),
+    art: artPreview.dataset.url || '',
+    date: new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}),
+    ownerUid: currentUser.uid, ownerEmail: currentUser.email,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset();
+  artPreview.innerHTML = ''; artPreview.dataset.url = '';
+  document.getElementById('art-status-journal').textContent = '';
+});
+
+document.getElementById('talk-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const artPreview = document.getElementById('art-preview-talk');
+  db.collection('talk').add({
+    name: document.getElementById('t-name').value.trim(),
+    genre: document.getElementById('t-genre').value.trim(),
+    body: document.getElementById('t-body').value.trim(),
+    spotify: document.getElementById('t-spotify').value.trim(),
+    art: artPreview.dataset.url || '',
+    ownerUid: currentUser ? currentUser.uid : null,
+    time: new Date().toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  e.target.reset(); spawnConfetti();
+  artPreview.innerHTML = ''; artPreview.dataset.url = '';
+  document.getElementById('art-status-talk').textContent = '';
+});
+
+document.getElementById('tape-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  tapes.push({ name: document.getElementById('tape-name').value.trim(), tracks: [] });
+  e.target.reset(); renderTapes(); saveTapes();
+});
+
+function deleteSong(id){ db.collection('songs').doc(id).delete(); }
+function deleteEntry(id){ db.collection('journal').doc(id).delete(); }
+function deleteTalk(id){ db.collection('talk').doc(id).delete(); }
+</script>
+</body>
+</html>
